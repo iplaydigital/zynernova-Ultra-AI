@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0cbf" />
+  <meta name="description" content="ZynerNova AI — ผู้ช่วยประเมินโซลาร์จากบิลค่าไฟ พร้อมเก็บข้อมูล Lead และส่งต่อทีมขาย" />
+  <meta name="zynernova-parent-origin" content="" />
+  <title>ZynerNova AI — ประเมินโซลาร์จากบิลค่าไฟ</title>
+  <link rel="icon" type="image/png" href="assets/ultra-avatar.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3-1.3 4.2a5 5 0 0 1-3.4 3.4L3 12l4.3 1.4a5 5 0 0 1 3.4 3.4L12 21l1.3-4.2a5 5 0 0 1 3.4-3.4L21 12l-4.3-1.4a5 5 0 0 1-3.4-3.4L12 3Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 2.9 8.1 7 10 4.1-1.9 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-bill" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6M9 16h3"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></symbol>
+    <symbol id="i-percent" viewBox="0 0 24 24"><path d="m19 5-14 14"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.5 3.5-7 8-7s7.2 2.5 8 7"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 3 18 9-18 9 4-9-4-9Z"/><path d="M7 12h14"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 15v5h14v-5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7h-6V1"/><path d="M20 7a9 9 0 1 0 1 7"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M8 3 5 4.5C3.5 5.3 4.3 10.7 8 14.5s9.3 4.6 10 3l1.5-3-4-2-1.5 2c-2-.7-4.8-3.5-5.5-5.5l2-1.5L8 3Z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-7.2 7-13a7 7 0 1 0-14 0c0 5.8 7 13 7 13Z"/><circle cx="12" cy="9" r="2.3"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="ZynerNova">
+        <img class="brand-logo" src="assets/zyner-nova-logo.png" alt="ZynerNova" />
+      </a>
+      <div class="topbar-center">
+        <span class="pulse-dot"></span>
+        ผู้ช่วยกำลังออนไลน์
+        <span class="sep">•</span>
+        <span>ประเมินฟรีประมาณ 2 นาที</span>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-ghost" id="resetBtn" type="button"><svg><use href="#i-refresh"></use></svg><span>เริ่มใหม่</span></button>
+        <button class="btn btn-dark" id="demoBtn" type="button"><svg><use href="#i-eye"></use></svg><span>ดูผลลัพธ์ตัวอย่าง</span></button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="journey-panel" aria-label="ขั้นตอนการประเมิน">
+        <div class="journey-heading">
+          <span class="eyebrow">SOLAR CHECKUP</span>
+          <h1>บ้านคุณเหมาะกับ<br />โซลาร์แบบไหน?</h1>
+          <p>ตอบสั้น ๆ ให้ AI ช่วยคำนวณระบบที่พอดี ไม่ขายเกินความจำเป็น</p>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-copy"><span>ความคืบหน้า</span><b id="progressText">0%</b></div>
+          <div class="progress-track"><span id="progressBar"></span></div>
+        </div>
+
+        <ol class="journey-steps" id="journeySteps">
+          <li class="active" data-stage="needs">
+            <span class="step-icon"><svg><use href="#i-bill"></use></svg></span>
+            <span><b>พฤติกรรมใช้ไฟ</b><small>บิลและช่วงเวลาที่ใช้</small></span>
+            <i><svg><use href="#i-check"></use></svg></i>
+          </li>
+          <li data-stage="roof">
+            <span class="step-icon"><svg><use href="#i-home"></use></svg></span>
+            <span><b>พื้นที่ติดตั้ง</b><small>ทำเลและขนาดหลังคา</small></span>
+            <i><svg><use href="#i-check"></use></svg></i>
+          </li>
+          <li data-stage="benefit">
+            <span class="step-icon"><svg><use href="#i-percent"></use></svg></span>
+            <span><b>สิทธิและงบประมาณ</b><small>หาทางเลือกที่คุ้มที่สุด</small></span>
+            <i><svg><use href="#i-check"></use></svg></i>
+          </li>
+          <li data-stage="contact">
+            <span class="step-icon"><svg><use href="#i-user"></use></svg></span>
+            <span><b>ข้อมูลติดต่อ</b><small>รับรายงานเฉพาะบ้านคุณ</small></span>
+            <i><svg><use href="#i-check"></use></svg></i>
+          </li>
+          <li data-stage="result">
+            <span class="step-icon"><svg><use href="#i-chart"></use></svg></span>
+            <span><b>รับผลประเมิน</b><small>พร้อมส่งต่อผู้เชี่ยวชาญ</small></span>
+            <i><svg><use href="#i-check"></use></svg></i>
+          </li>
+        </ol>
+
+        <div class="trust-card">
+          <span class="trust-icon"><svg><use href="#i-shield"></use></svg></span>
+          <div><b>คุณเลือกได้ว่าจะให้ใช้ข้อมูลอย่างไร</b><p>ใช้เพื่อจัดทำรายงานและติดต่อกลับตามที่ยินยอม</p></div>
+        </div>
+      </aside>
+
+      <section class="chat-card" aria-label="แชตกับ ZynerNova AI">
+        <div class="chat-header">
+          <div class="ai-avatar"><img src="assets/ultra-avatar.png" alt="น้อง Ultra" /><span></span></div>
+          <div class="chat-title"><b>น้อง Ultra ⚡️ <em>AI</em></b><small><span></span> วิศวกรที่ปรึกษาโซลาร์อัจฉริยะ</small></div>
+          <div class="session-chip"><svg><use href="#i-lock"></use></svg> เซสชันส่วนตัว</div>
+        </div>
+
+        <div class="privacy-note"><svg><use href="#i-shield"></use></svg><span>ใช้ข้อมูลตามความยินยอม · ไฟล์อาจส่งไปวิเคราะห์ด้วย AI ที่ผู้ดูแลตั้งค่า</span><button id="privacyBtn" type="button">รายละเอียด</button></div>
+
+        <div class="messages" id="messages" role="log" aria-live="polite"></div>
+
+        <div class="typing" id="typing" aria-hidden="true">
+          <div class="mini-avatar"><img src="assets/ultra-avatar.png" alt="น้อง Ultra" /></div>
+          <div class="typing-bubble"><i></i><i></i><i></i></div>
+        </div>
+
+        <div class="composer-wrap">
+          <div class="quick-replies" id="quickReplies"></div>
+          <form class="composer" id="responseForm" autocomplete="off">
+            <button class="upload-btn" id="uploadBtn" type="button" title="แนบรูป เสียง หรือเอกสาร" hidden><svg><use href="#i-upload"></use></svg></button>
+            <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,audio/*,application/pdf,text/plain" hidden />
+            <input id="answerInput" type="text" placeholder="พิมพ์คำตอบของคุณ…" aria-label="พิมพ์คำตอบ" />
+            <button class="send-btn" id="sendBtn" type="submit" aria-label="ส่งคำตอบ"><svg><use href="#i-send"></use></svg></button>
+          </form>
+          <p class="composer-hint" id="composerHint"><svg><use href="#i-lock"></use></svg> หากเปิดใช้ AI คำตอบหรือไฟล์ที่แนบอาจถูกส่งไปยังผู้ให้บริการที่กำหนด</p>
+        </div>
+      </section>
+
+      <aside class="result-panel" aria-label="ผลประเมินแบบเรียลไทม์">
+        <div class="result-topline">
+          <div><span class="live-dot"></span><span>LIVE ESTIMATE</span></div>
+          <button id="openReportTop" type="button" disabled>ดูรายงานเต็ม <span>↗</span></button>
+        </div>
+        <div id="estimateContent"></div>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <div><svg><use href="#i-info"></use></svg> ผลลัพธ์เป็นการประมาณการเบื้องต้น ต้องสำรวจหน้างานและตรวจสอบเงื่อนไขโครงการอีกครั้ง</div>
+      <span>© ZynerNova · ข้อมูลอ้างอิงอัปเดต พ.ย. 2569 · <a class="admin-link" href="admin/">สำหรับผู้ดูแล</a></span>
+    </footer>
+  </div>
+
+  <dialog class="report-modal" id="reportModal">
+    <div class="modal-shell">
+      <div class="modal-head">
+        <div class="modal-brand"><img class="modal-logo" src="assets/zyner-nova-logo.png" alt="ZynerNova" /><div><b>รายงานโซลาร์เฉพาะบ้านคุณ</b><small id="reportId">ZYNERNOVA PRELIMINARY REPORT</small></div></div>
+        <div class="modal-actions">
+          <button class="icon-button" id="copyReportBtn" title="คัดลอกสรุป"><svg><use href="#i-copy"></use></svg></button>
+          <button class="icon-button" id="closeReportBtn" title="ปิด"><svg><use href="#i-close"></use></svg></button>
+        </div>
+      </div>
+      <div class="modal-body" id="reportBody"></div>
+    </div>
+  </dialog>
+
+  <dialog class="privacy-modal" id="privacyModal">
+    <div class="privacy-dialog">
+      <button class="dialog-close" id="privacyClose" type="button"><svg><use href="#i-close"></use></svg></button>
+      <span class="privacy-lock"><svg><use href="#i-shield"></use></svg></span>
+      <span class="eyebrow">YOUR DATA, YOUR CHOICE</span>
+      <h2>เราใช้ข้อมูลของคุณอย่างไร</h2>
+      <p>คำตอบและไฟล์ที่คุณส่งหลังให้ความยินยอมใช้คำนวณรายงานและให้ทีมที่ปรึกษาติดต่อกลับ หากเปิดใช้ AI ข้อมูลที่จำเป็นอาจถูกส่งไปยังผู้ให้บริการโมเดลที่ผู้ดูแลตั้งค่าเพื่อสร้างคำตอบหรือช่วยอ่านไฟล์</p>
+      <ul>
+        <li><svg><use href="#i-check"></use></svg> แนบเฉพาะไฟล์ที่ต้องการให้ช่วยตรวจสอบ</li>
+        <li><svg><use href="#i-check"></use></svg> ผล AI และตัวเลขเป็นข้อมูลเบื้องต้น ต้องให้ผู้เชี่ยวชาญยืนยัน</li>
+        <li><svg><use href="#i-check"></use></svg> ติดต่อทีม ZynerNova เพื่อขอถอนความยินยอมหรือจัดการข้อมูล</li>
+      </ul>
+      <button class="btn btn-dark wide" id="privacyOkay" type="button">เข้าใจแล้ว</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"><svg><use href="#i-check"></use></svg><span>คัดลอกแล้ว</span></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

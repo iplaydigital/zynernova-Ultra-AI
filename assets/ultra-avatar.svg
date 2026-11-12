@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="น้อง Ultra">
+  <!-- background -->
+  <rect width="120" height="120" rx="28" fill="#EEF3FF"/>
+  <!-- body / engineer shirt -->
+  <path d="M26 120 L26 108 Q26 98 38 97 L82 97 Q94 98 94 108 L94 120 Z" fill="#004CFE"/>
+  <path d="M52 97 L60 108 L68 97 Z" fill="#A6FA4C"/>
+  <circle cx="60" cy="110" r="2.6" fill="#A6FA4C"/>
+  <!-- ears -->
+  <rect x="17" y="58" width="11" height="20" rx="5" fill="#004CFE"/>
+  <rect x="92" y="58" width="11" height="20" rx="5" fill="#004CFE"/>
+  <!-- head -->
+  <rect x="26" y="40" width="68" height="60" rx="22" fill="#0B0CBF"/>
+  <!-- visor -->
+  <rect x="34" y="58" width="52" height="28" rx="13" fill="#111437"/>
+  <!-- eyes -->
+  <circle cx="50" cy="71" r="5.5" fill="#A6FA4C"/>
+  <circle cx="70" cy="71" r="5.5" fill="#A6FA4C"/>
+  <circle cx="52" cy="69" r="1.6" fill="#FFFFFF"/>
+  <circle cx="72" cy="69" r="1.6" fill="#FFFFFF"/>
+  <!-- smile -->
+  <path d="M52 80 Q60 86 68 80" fill="none" stroke="#A6FA4C" stroke-width="2.6" stroke-linecap="round"/>
+  <!-- engineer cap -->
+  <path d="M30 44 C30 24 44 16 60 16 C76 16 90 24 90 44 Z" fill="#004CFE"/>
+  <rect x="30" y="37" width="60" height="6" rx="2" fill="#A6FA4C"/>
+  <rect x="20" y="42" width="80" height="9" rx="4.5" fill="#0B0CBF"/>
+  <!-- cap badge with lightning bolt -->
+  <circle cx="60" cy="27" r="8" fill="#A6FA4C"/>
+  <path d="M62.5 21.5 L56.5 28.2 H60.2 L57.6 33 L63.6 26.2 H59.9 Z" fill="#0B0CBF"/>
+</svg>

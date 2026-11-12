@@ -1,0 +1,15 @@
+{
+  "name": "zynernova-ultra-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZynerNova Ultra AI solar assessment, lead capture, and admin tools",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20.6"
+  }
+}

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0cbf" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>หลังบ้าน · ZynerNova Ultra AI</title>
+  <link rel="icon" type="image/png" href="../assets/ultra-avatar.png" />
+  <link rel="stylesheet" href="../admin.css" />
+</head>
+<body>
+  <div class="admin-app">
+    <header class="admin-header">
+      <a class="admin-brand" href="../" aria-label="กลับสู่ ZynerNova AI">
+        <img src="../assets/zyner-nova-logo.png" alt="ZynerNova" />
+        <span><b>Ultra AI</b><small>ADMIN CONSOLE</small></span>
+      </a>
+      <div class="header-right">
+        <a class="back-link" href="../">กลับหน้าประเมิน</a>
+        <button class="button button-subtle" id="logoutButton" type="button" hidden>ออกจากระบบ</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section class="login-card" id="loginView" aria-labelledby="loginTitle" hidden>
+        <div class="login-mark">⚡</div>
+        <span class="eyebrow">SECURE ADMIN ACCESS</span>
+        <h1 id="loginTitle">เข้าสู่ระบบหลังบ้าน</h1>
+        <p class="muted">ใช้รหัสผ่านผู้ดูแลที่กำหนดไว้ใน Environment ของเซิร์ฟเวอร์</p>
+        <form id="loginForm">
+          <label for="loginPassword">รหัสผ่านผู้ดูแล</label>
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" required minlength="1" />
+          <button class="button button-primary full-width" type="submit">เข้าสู่ระบบ</button>
+          <p class="form-message" id="loginMessage" role="status"></p>
+        </form>
+        <p class="setup-note" id="adminSetupNote" hidden>ยังไม่ได้ตั้งค่า ADMIN_PASSWORD บนเซิร์ฟเวอร์ กรุณาตั้งค่า Environment ก่อนเปิดใช้งาน</p>
+      </section>
+
+      <section class="dashboard" id="dashboard" hidden>
+        <div class="page-intro">
+          <div>
+            <span class="eyebrow">ZYNERNOVA · OPERATIONS</span>
+            <h1>จัดการ Ultra AI</h1>
+            <p class="muted">Lead และไฟล์แนบจัดเก็บใน JSON ฝั่งเซิร์ฟเวอร์ · ไม่ใช้ฐานข้อมูลภายนอก</p>
+          </div>
+          <span class="status-pill" id="modelStatus"><i></i> กำลังตรวจสอบ AI</span>
+        </div>
+
+        <nav class="admin-nav" aria-label="เมนูหลังบ้าน">
+          <button type="button" class="nav-item active" data-panel="leadsPanel">ลูกค้าและ Lead</button>
+          <button type="button" class="nav-item" data-panel="settingsPanel">ตั้งค่า AI</button>
+          <button type="button" class="nav-item" data-panel="knowledgePanel">คลังความรู้ RAG</button>
+        </nav>
+
+        <section class="panel active" id="leadsPanel" aria-labelledby="leadsHeading">
+          <div class="panel-heading">
+            <div><h2 id="leadsHeading">รายการ Lead</h2><p class="muted">ข้อมูลติดต่อจะแสดงเฉพาะผู้ดูแลที่เข้าสู่ระบบ</p></div>
+            <button class="button button-subtle" id="refreshLeads" type="button">รีเฟรช</button>
+          </div>
+          <div class="leads-layout">
+            <div class="lead-list-wrap">
+              <div class="lead-list-toolbar">
+                <label class="visually-hidden" for="leadSearch">ค้นหา Lead</label>
+                <input id="leadSearch" type="search" placeholder="ค้นหาชื่อ เบอร์ หรือพื้นที่" />
+                <span class="count-pill" id="leadCount">0</span>
+              </div>
+              <div class="lead-list" id="leadList" aria-live="polite"></div>
+            </div>
+            <article class="lead-detail empty-detail" id="leadDetail">
+              <div class="empty-state"><span>↖</span><b>เลือก Lead เพื่อดูรายละเอียด</b><p>ประวัติคำตอบ ผลประเมิน และไฟล์แนบจะแสดงที่นี่</p></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" id="settingsPanel" aria-labelledby="settingsHeading" hidden>
+          <div class="panel-heading"><div><h2 id="settingsHeading">ตั้งค่า AI Model</h2><p class="muted">API key ถูกเข้ารหัสด้วย APP_SECRET ก่อนเก็บลงไฟล์ JSON</p></div></div>
+          <form class="settings-form" id="settingsForm">
+            <div class="form-grid">
+              <label>OpenAI-compatible Base URL
+                <input id="aiBaseUrl" type="url" placeholder="https://api.openai.com/v1" required />
+                <small>ใช้ HTTPS ใน Production และใส่ base path เช่น /v1</small>
+              </label>
+              <label>Model ID
+                <input id="aiModel" type="text" placeholder="gpt-4o-mini" required maxlength="120" />
+                <small>ชื่อโมเดลต้องรองรับ Chat Completions; รูปภาพใช้ vision และเสียงใช้ transcription</small>
+              </label>
+            </div>
+            <label>API key
+              <input id="aiApiKey" type="password" placeholder="วาง key เพื่อเปลี่ยน (จะไม่แสดง key ที่บันทึกไว้)" autocomplete="new-password" />
+              <small id="apiKeyStatus">ยังไม่ได้ตั้งค่า</small>
+            </label>
+            <label class="checkbox-row"><input id="clearApiKey" type="checkbox" /> ลบ key ที่เก็บในไฟล์ settings (ไม่มีผลกับ AI_API_KEY ที่ตั้งผ่าน Environment)</label>
+            <label>System Prompt
+              <textarea id="systemPrompt" rows="9" maxlength="8000" required></textarea>
+              <small>ไม่ควรใส่ข้อมูลลูกค้าหรือรหัสลับใน System Prompt</small>
+            </label>
+            <div class="form-actions"><button class="button button-primary" type="submit">บันทึกการตั้งค่า</button><span class="form-message" id="settingsMessage" role="status"></span></div>
+          </form>
+          <aside class="notice"><b>ความปลอดภัย</b><p>กำหนด ADMIN_PASSWORD และ APP_SECRET เป็น Environment variables ที่แข็งแรง ห้ามเก็บไฟล์ <code>data/</code> หรือไฟล์ .env ใน GitHub การตั้งค่า API key จาก Environment จะมีลำดับความสำคัญสูงกว่าค่าที่แก้จากหน้านี้</p></aside>
+        </section>
+
+        <section class="panel" id="knowledgePanel" aria-labelledby="knowledgeHeading" hidden>
+          <div class="panel-heading"><div><h2 id="knowledgeHeading">คลังความรู้ RAG</h2><p class="muted">ระบบค้นคืนแบบ keyword ranking เป็นจุดเริ่มต้น และแนบเนื้อหาที่ตรงกับคำถามไปยัง Model</p></div></div>
+          <div class="notice warning"><b>ตรวจสอบก่อนใช้งานจริง</b><p>เนื้อหาที่มี reviewStatus เป็น <code>needs-review</code> ต้องให้ทีมผลิตภัณฑ์/กฎหมายยืนยัน โดยเฉพาะตัวเลขราคา ภาษี และมาตรการสนับสนุน</p></div>
+          <label for="knowledgeEditor">Knowledge Base JSON</label>
+          <textarea class="knowledge-editor" id="knowledgeEditor" spellcheck="false" rows="22"></textarea>
+          <div class="form-actions"><button class="button button-primary" id="saveKnowledge" type="button">บันทึกคลังความรู้</button><span class="form-message" id="knowledgeMessage" role="status"></span></div>
+        </section>
+      </section>
+    </main>
+
+    <div class="toast" id="adminToast" role="status" aria-live="polite"></div>
+  </div>
+  <script src="../admin.js" defer></script>
+</body>
+</html>

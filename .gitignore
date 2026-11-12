@@ -1,0 +1,17 @@
+# Runtime secrets and local data
+.env
+.env.*
+!.env.example
+data/
+*.log
+npm-debug.log*
+
+# Dependencies / generated files
+node_modules/
+coverage/
+.DS_Store
+Thumbs.db
+
+# Downloaded handoff archive (source files are extracted into the repo)
+google_drive/
+zynernova-ultra-ai-handoff.zip
