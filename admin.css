@@ -18,7 +18,7 @@
 
 * { box-sizing: border-box; }
 body { min-width: 320px; min-height: 100vh; margin: 0; background: radial-gradient(ellipse at 15% 0%, #eef4e4 0, transparent 42%), var(--paper); }
-button, input, textarea { font: inherit; }
+button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 a { color: inherit; }
 [hidden] { display: none !important; }
@@ -41,12 +41,15 @@ a { color: inherit; }
 .login-card h1 { margin: 8px 0 0; font-size: 25px; letter-spacing: -.4px; }
 .login-card form { margin-top: 23px; }
 .login-card label, .settings-form label, .panel > label { display: flex; flex-direction: column; gap: 7px; color: #45534b; font-size: 12px; font-weight: 700; }
-input, textarea { width: 100%; padding: 11px 12px; border: 1px solid #dce3dc; border-radius: 11px; outline: none; color: var(--ink); background: white; font-size: 12px; transition: border-color .16s, box-shadow .16s; }
+input, textarea, select { width: 100%; padding: 11px 12px; border: 1px solid #dce3dc; border-radius: 11px; outline: none; color: var(--ink); background: white; font-size: 12px; transition: border-color .16s, box-shadow .16s; }
+select { min-height: 41px; }
+input:disabled { color: #87938b; background: #f2f4f1; cursor: not-allowed; }
 input:focus, textarea:focus { border-color: #6676dc; box-shadow: 0 0 0 3px rgba(29,54,199,.09); }
 textarea { resize: vertical; line-height: 1.65; }
 input::placeholder, textarea::placeholder { color: #a5afa8; }
 .button { min-height: 38px; padding: 0 15px; border: 1px solid transparent; border-radius: 10px; font-size: 11px; font-weight: 700; transition: transform .15s, background .15s, border-color .15s; }
 .button:hover { transform: translateY(-1px); }
+.button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 .button-primary { color: white; background: var(--blue); }
 .button-primary:hover { background: #142ba8; }
 .button-subtle { color: #526159; border-color: var(--line); background: white; }
@@ -123,6 +126,36 @@ input::placeholder, textarea::placeholder { color: #a5afa8; }
 .notice p { margin: 4px 0 0; }
 .notice.warning { margin: 0 0 15px; border-color: #ead9a8; color: #786231; background: #fff9e9; }
 code { padding: 1px 4px; border-radius: 4px; background: rgba(0,0,0,.05); font-size: 10px; }
+.active-provider-summary { margin-bottom: 17px; padding: 12px 14px; border: 1px solid #dbe6d5; border-radius: 11px; color: #4e624e; background: #f5f9f1; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.provider-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.provider-card { min-width: 0; padding: 16px; display: flex; flex-direction: column; gap: 13px; border: 1px solid var(--line); border-radius: 14px; background: #fbfcfa; }
+.provider-card.active { border-color: #b7d9aa; background: #f8fcf5; box-shadow: inset 0 0 0 1px rgba(79,145,68,.08); }
+.provider-card-heading, .skill-card-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.provider-card-heading h3, .provider-form h3 { margin: 0; font-size: 14px; }
+.provider-card-heading p { margin: 3px 0 0; font-size: 10px; }
+.provider-badge { flex: 0 0 auto; padding: 5px 8px; border-radius: 99px; color: #68756d; background: #edf0ed; font-size: 9px; font-weight: 700; }
+.provider-badge.selected { color: #347348; background: #e8f4df; }
+.provider-details { display: grid; gap: 8px; }
+.provider-details > div { min-width: 0; display: grid; gap: 2px; }
+.provider-details small { color: #8a968e; font-size: 9px; }
+.provider-details span { color: #425047; font-size: 10px; overflow-wrap: anywhere; }
+.provider-actions { margin-top: auto; padding-top: 3px; display: flex; flex-wrap: wrap; gap: 6px; }
+.provider-actions .button, .skill-card-heading .button { min-height: 32px; padding: 0 10px; font-size: 10px; }
+.provider-actions .form-message { flex-basis: 100%; margin: 0; }
+.button-danger { color: #943e38; border-color: #eed8d5; background: #fff9f8; }
+.button-danger:hover { border-color: #ddb8b3; background: #fff1ef; }
+.provider-form { margin-top: 20px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: #fdfefc; }
+.provider-form .panel-heading { margin-bottom: 14px; }
+.provider-form label:not(.checkbox-row), .skill-fields label { display: flex; min-width: 0; flex-direction: column; gap: 7px; color: #45534b; font-size: 11px; font-weight: 700; }
+.provider-form small { color: #859189; font-size: 9px; font-weight: 400; line-height: 1.55; }
+.provider-empty { max-width: none; padding: 32px 16px; border: 1px dashed var(--line); border-radius: 13px; background: #fbfcfa; font-size: 11px; }
+.skill-list { display: grid; gap: 12px; }
+.skill-card { padding: 15px; border: 1px solid var(--line); border-radius: 13px; background: #fbfcfa; }
+.skill-enabled { min-height: 32px; }
+.skill-enabled input { width: 15px; height: 15px; }
+.skill-fields { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.skill-fields label:nth-child(4) { grid-column: 1 / -1; }
+.skill-fields textarea { min-height: 98px; }
 .knowledge-editor { min-height: 390px; font: 11px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
 .toast { min-width: 190px; max-width: calc(100% - 30px); padding: 11px 15px; position: fixed; left: 50%; bottom: 20px; z-index: 5; transform: translate(-50%, 16px); border-radius: 12px; color: white; background: var(--forest); box-shadow: 0 10px 35px rgba(0,0,0,.17); font-size: 11px; text-align: center; opacity: 0; pointer-events: none; transition: .2s ease; }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
@@ -146,7 +179,8 @@ code { padding: 1px 4px; border-radius: 4px; background: rgba(0,0,0,.05); font-s
   .page-intro { align-items: flex-start; flex-direction: column; gap: 12px; }
   .admin-nav { overflow: auto; }
   .nav-item { padding: 0 11px; white-space: nowrap; }
-  .form-grid { grid-template-columns: 1fr; }
+  .form-grid, .skill-fields { grid-template-columns: 1fr; }
+  .skill-fields label:nth-child(4) { grid-column: auto; }
   .detail-grid { grid-template-columns: 1fr 1fr; }
   .panel-heading { align-items: flex-start; }
 }

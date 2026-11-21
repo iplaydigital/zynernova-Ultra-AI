@@ -34,7 +34,11 @@ AI_MODEL=gpt-4o-mini
 AI_API_KEY=...
 ```
 
-ใช้ endpoint ที่รองรับ **Chat Completions**, ภาพแบบ `image_url` และ (สำหรับเสียง) `/audio/transcriptions` หากตั้ง API key ผ่านหน้า Admin ระบบจะเข้ารหัสด้วย AES-256-GCM ก่อนเขียน `data/settings.json`; `APP_SECRET` ต้องคงเดิมเพื่อถอดรหัส key หลังรีสตาร์ต หากตั้ง `AI_API_KEY` ใน Environment ค่านั้นมีลำดับความสำคัญสูงกว่าและแก้จากหน้า Admin ไม่ได้
+จากเมนู **AI Providers** ในหลังบ้าน เพิ่มและสลับผู้ให้บริการได้หลายรายการ: OpenAI, OpenRouter หรือ OpenAI-compatible/Custom พร้อมทดสอบการเชื่อมต่อก่อนใช้งาน แต่ละ Provider กำหนดชื่อ, Base URL, Model ID และ API key แยกกัน ระบบเรียก endpoint **Chat Completions**; การอ่านภาพต้องรองรับ `image_url` และการถอดเสียงต้องรองรับ `/audio/transcriptions` ตามฟีเจอร์ที่เปิดใช้
+
+API key ที่บันทึกผ่าน Admin จะถูกเข้ารหัสด้วย AES-256-GCM ก่อนเขียน `data/settings.json`; ต้องตั้ง `APP_SECRET` อย่างน้อย 24 ตัวอักษรเพื่อบันทึก key และคงค่าเดิมไว้เพื่อถอดรหัสหลังรีสตาร์ต (Production บังคับอย่างน้อย 32 ตัวอักษร) ค่า `AI_API_KEY`, `AI_BASE_URL` และ `AI_MODEL` จาก Environment มีลำดับความสำคัญสูงกว่าค่า Provider; API key จาก Environment แก้ไขจากหน้าเว็บไม่ได้
+
+เมนู **จัดการ Skills** แก้ไข เพิ่ม ลบ และเปิด/ปิดชุดคำแนะนำได้ ค่าเริ่มต้นมี Solar Advisor, Bill Reading และ Financial & Policy Safety เฉพาะ Skills ที่เปิดใช้งานจะถูกรวมกับคำสั่งระบบของแชต การประเมิน และการวิเคราะห์ไฟล์แนบ
 
 อย่าใส่ API key ใน `index.html`, `app.js`, GitHub Actions logs หรือ frontend configuration
 
@@ -45,7 +49,7 @@ AI_API_KEY=...
 - เมื่อเปิดใช้ Model ระบบสร้างคำถามต่อเนื่องภาษาไทยได้; หลังประเมินถามคำถามเพิ่มเติมได้
 - ไฟล์ภาพ JPEG/PNG/WebP วิเคราะห์บิลด้วย vision ได้เมื่อ Model รองรับ; ไฟล์เสียงส่งไปถอดเสียงเมื่อ provider รองรับ; ไฟล์ข้อความสรุปได้; PDF เก็บไว้ให้ผู้ดูแลดาวน์โหลด แต่ **ยังไม่มี OCR/การอ่าน PDF อัตโนมัติ**
 - Lead, ประวัติข้อความ และ metadata ไฟล์แนบเก็บเป็น JSON ใน `DATA_DIR` (ค่าเริ่มต้น `./data`); ไฟล์แนบอยู่ในโฟลเดอร์ private `data/uploads/` และดาวน์โหลดได้เฉพาะผู้ดูแล
-- หลังบ้านใช้รหัสผ่าน `ADMIN_PASSWORD`, session cookie แบบ HttpOnly/SameSite=Strict และจัดการ Model, System Prompt, Lead, ไฟล์แนบ และ Knowledge Base
+- หลังบ้านใช้รหัสผ่าน `ADMIN_PASSWORD`, session cookie แบบ HttpOnly/SameSite=Strict และจัดการ AI Providers/Models, System Prompt, Skills, Lead, ไฟล์แนบ และ Knowledge Base
 - RAG ปัจจุบันเป็น keyword ranking จาก `knowledge/knowledge-base.json` ไม่ใช่ vector database/embeddings; เนื้อหาที่ `needs-review` ต้องตรวจสอบก่อนนำไปตอบลูกค้าจริง
 
 ## Deploy ที่ `/ai/`
@@ -76,6 +80,7 @@ APP_SECRET=<random-secret-at-least-32-characters>
 
 ```bash
 npm test
+node --check server.js
 node --check app.js
 node --check admin.js
 ```

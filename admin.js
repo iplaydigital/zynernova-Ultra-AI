@@ -9,6 +9,11 @@
   const toast = $('#adminToast');
   let leads = [];
   let activeLeadId = '';
+  let providers = [];
+  let providerPresets = [];
+  let providerSettings = {};
+  let skills = [];
+  let lastPresetBaseUrl = '';
   let toastTimer;
 
   async function api(path, options = {}) {
@@ -49,7 +54,7 @@
     loginView.hidden = true;
     dashboard.hidden = false;
     $('#logoutButton').hidden = false;
-    await Promise.all([loadLeads(), loadSettings(), loadKnowledge(), loadHealth()]);
+    await Promise.all([loadLeads(), loadProviders(), loadSkills(), loadSettings(), loadKnowledge(), loadHealth()]);
   }
 
   async function checkSession() {
@@ -280,25 +285,257 @@
     try {
       const response = await api('admin/settings');
       const settings = response.settings;
-      $('#aiBaseUrl').value = settings.baseUrl || '';
-      $('#aiModel').value = settings.model || '';
       $('#systemPrompt').value = settings.systemPrompt || '';
-      $('#aiApiKey').value = '';
-      $('#clearApiKey').checked = false;
-      const keyStatus = $('#apiKeyStatus');
-      if (settings.apiKeyConfigured) {
-        keyStatus.textContent = settings.apiKeySource === 'environment'
-          ? 'ใช้ AI_API_KEY จาก Environment; จะไม่เปิดเผยค่าของ key'
-          : `ตั้งค่า key แล้ว${settings.apiKeyLast4 ? ` (ลงท้าย ${settings.apiKeyLast4})` : ''}`;
-      } else {
-        keyStatus.textContent = settings.keyManagementAvailable
-          ? 'ยังไม่ได้ตั้งค่า API key'
-          : 'ยังไม่ได้ตั้งค่า APP_SECRET สำหรับเข้ารหัส key';
-      }
-      $('#aiApiKey').disabled = settings.apiKeySource === 'environment' || !settings.keyManagementAvailable;
+      const summary = $('#activeProviderSummary');
+      summary.textContent = settings.activeProviderId
+        ? `Provider ที่ใช้งาน: ${settings.activeProviderName} · ${settings.model} · ${settings.baseUrl}${settings.apiKeySource === 'environment' ? ' · ใช้ API key จาก Environment' : ''}`
+        : `ยังไม่ได้เลือก Provider เฉพาะ${settings.apiKeyConfigured ? ' · ใช้การตั้งค่า AI เดิมหรือ Environment' : ' · AI ยังไม่มี API key ที่ตั้งค่าไว้'}`;
     } catch (error) {
       setMessage($('#settingsMessage'), error.message, 'error');
     }
+  }
+
+  function getProviderLabel(type) {
+    return providerPresets.find((preset) => preset.type === type)?.label || type || 'Custom';
+  }
+
+  function createProviderButton(label, className, handler) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `button ${className}`;
+    button.textContent = label;
+    button.addEventListener('click', handler);
+    return button;
+  }
+
+  function renderProviders() {
+    const list = $('#providerList');
+    list.replaceChildren();
+    if (!providers.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state provider-empty';
+      empty.textContent = 'ยังไม่มี Provider ที่บันทึกไว้ เพิ่ม Provider เพื่อเลือก Model และเชื่อมต่อ API';
+      list.appendChild(empty);
+    }
+
+    providers.forEach((provider) => {
+      const card = document.createElement('article');
+      card.className = `provider-card${provider.active ? ' active' : ''}`;
+      const heading = document.createElement('div');
+      heading.className = 'provider-card-heading';
+      const identity = document.createElement('div');
+      const name = document.createElement('h3');
+      name.textContent = provider.name;
+      const type = document.createElement('p');
+      type.className = 'muted';
+      type.textContent = getProviderLabel(provider.type);
+      identity.append(name, type);
+      const badge = document.createElement('span');
+      badge.className = `provider-badge${provider.active ? ' selected' : ''}`;
+      badge.textContent = provider.active ? 'กำลังใช้งาน' : 'ไม่ได้เลือก';
+      heading.append(identity, badge);
+
+      const details = document.createElement('div');
+      details.className = 'provider-details';
+      [
+        ['Model', provider.model],
+        ['Base URL', provider.baseUrl],
+        ['API key', provider.apiKeyConfigured ? `${provider.apiKeySource === 'environment' ? 'Environment' : 'ตั้งค่าแล้ว'}${provider.apiKeyLast4 ? ` · ลงท้าย ${provider.apiKeyLast4}` : ''}` : 'ยังไม่ได้ตั้งค่า']
+      ].forEach(([label, value]) => {
+        const item = document.createElement('div');
+        const caption = document.createElement('small');
+        caption.textContent = label;
+        const content = document.createElement('span');
+        content.textContent = value || '—';
+        item.append(caption, content);
+        details.appendChild(item);
+      });
+
+      const actions = document.createElement('div');
+      actions.className = 'provider-actions';
+      if (!provider.active) {
+        actions.appendChild(createProviderButton('ใช้ Provider นี้', 'button-primary', () => activateProvider(provider.id)));
+      }
+      const testStatus = document.createElement('span');
+      testStatus.className = 'provider-test-status';
+      testStatus.setAttribute('role', 'status');
+      const testButton = createProviderButton('ทดสอบ', 'button-subtle', () => testProvider(provider.id, testStatus));
+      testButton.disabled = !provider.apiKeyConfigured;
+      if (!provider.apiKeyConfigured) testButton.title = 'ตั้งค่า API key ก่อนทดสอบ';
+      actions.append(testButton, testStatus);
+      actions.appendChild(createProviderButton('แก้ไข', 'button-subtle', () => editProvider(provider)));
+      actions.appendChild(createProviderButton('ลบ', 'button-danger', () => deleteProvider(provider)));
+      card.append(heading, details, actions);
+      list.appendChild(card);
+    });
+  }
+
+  async function loadProviders() {
+    try {
+      const response = await api('admin/providers');
+      providers = Array.isArray(response.providers) ? response.providers : [];
+      providerPresets = Array.isArray(response.presets) ? response.presets : [];
+      providerSettings = response;
+      const notice = $('#providerEnvironmentNotice');
+      const overrides = [];
+      if (response.apiKeyEnvironmentOverride) overrides.push('API key');
+      if (response.modelEnvironmentOverride) overrides.push('Model');
+      if (response.baseUrlEnvironmentOverride) overrides.push('Base URL');
+      notice.hidden = overrides.length === 0;
+      notice.textContent = overrides.length
+        ? `ค่าจาก Environment (${overrides.join(', ')}) มีลำดับความสำคัญสูงกว่าค่าของ Provider ที่เลือก`
+        : '';
+      $('#providerApiKey').disabled = Boolean(response.apiKeyEnvironmentOverride || !response.keyManagementAvailable);
+      $('#providerKeyStatus').textContent = response.apiKeyEnvironmentOverride
+        ? 'API key ถูกกำหนดจาก Environment; แก้ไขจากหน้าเว็บไม่ได้'
+        : response.keyManagementAvailable ? 'กรอก key เพื่อเพิ่มหรือเปลี่ยน key ที่เก็บไว้อย่างปลอดภัย' : 'ต้องตั้งค่า APP_SECRET อย่างน้อย 24 ตัวอักษรก่อนจัดเก็บ API key';
+      renderProviders();
+    } catch (error) {
+      setMessage($('#providerMessage'), error.message, 'error');
+    }
+  }
+
+  function resetProviderForm() {
+    $('#providerForm').reset();
+    $('#providerId').value = '';
+    $('#providerFormHeading').textContent = 'เพิ่ม Provider';
+    $('#providerForm').hidden = true;
+    $('#testProvider').hidden = true;
+    $('#clearProviderKeyRow').hidden = true;
+    $('#providerApiKey').disabled = Boolean(providerSettings.apiKeyEnvironmentOverride || !providerSettings.keyManagementAvailable);
+    setMessage($('#providerMessage'), '');
+  }
+
+  function openNewProviderForm() {
+    resetProviderForm();
+    $('#providerForm').hidden = false;
+    $('#providerType').value = 'openai';
+    const preset = providerPresets.find((item) => item.type === 'openai');
+    $('#providerBaseUrl').value = preset?.baseUrl || '';
+    lastPresetBaseUrl = preset?.baseUrl || '';
+    $('#providerFormHeading').textContent = 'เพิ่ม Provider';
+    $('#providerForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    $('#providerName').focus();
+  }
+
+  function editProvider(provider) {
+    resetProviderForm();
+    $('#providerForm').hidden = false;
+    $('#providerId').value = provider.id;
+    $('#providerName').value = provider.name;
+    $('#providerType').value = provider.type;
+    $('#providerBaseUrl').value = provider.baseUrl;
+    $('#providerModel').value = provider.model;
+    $('#providerFormHeading').textContent = `แก้ไข ${provider.name}`;
+    $('#providerKeyStatus').textContent = provider.apiKeyConfigured
+      ? `${provider.apiKeySource === 'environment' ? 'ใช้ API key จาก Environment' : `ตั้งค่า key แล้ว${provider.apiKeyLast4 ? ` (ลงท้าย ${provider.apiKeyLast4})` : ''}`} · กรอกค่าใหม่เพื่อเปลี่ยน`
+      : 'ยังไม่ได้ตั้งค่า API key';
+    $('#clearProviderKeyRow').hidden = !provider.apiKeyConfigured || provider.apiKeySource === 'environment';
+    $('#testProvider').hidden = false;
+    lastPresetBaseUrl = providerPresets.find((item) => item.type === provider.type)?.baseUrl || '';
+    $('#providerForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function activateProvider(providerId) {
+    try {
+      await api('admin/providers/active', { method: 'PUT', body: JSON.stringify({ providerId }) });
+      await Promise.all([loadProviders(), loadSettings(), loadHealth()]);
+      showToast('เปลี่ยน Provider ที่ใช้งานแล้ว');
+    } catch (error) {
+      showToast(error.message);
+    }
+  }
+
+  async function testProvider(providerId, statusElement = $('#providerMessage')) {
+    setMessage(statusElement, 'กำลังทดสอบการเชื่อมต่อ…');
+    try {
+      const result = await api(`admin/providers/${encodeURIComponent(providerId)}/test`, { method: 'POST', body: '{}' });
+      setMessage(statusElement, result.message || 'เชื่อมต่อสำเร็จ', 'success');
+    } catch (error) {
+      setMessage(statusElement, error.message, 'error');
+    }
+  }
+
+  async function deleteProvider(provider) {
+    if (!window.confirm(`ต้องการลบ Provider “${provider.name}” หรือไม่?`)) return;
+    try {
+      await api(`admin/providers/${encodeURIComponent(provider.id)}`, { method: 'DELETE' });
+      await Promise.all([loadProviders(), loadSettings(), loadHealth()]);
+      showToast('ลบ Provider แล้ว');
+    } catch (error) {
+      showToast(error.message);
+    }
+  }
+
+  function makeSkillField(labelText, name, value, options = {}) {
+    const label = document.createElement('label');
+    label.textContent = labelText;
+    const control = options.multiline ? document.createElement('textarea') : document.createElement('input');
+    control.name = name;
+    control.value = value || '';
+    control.maxLength = options.maxLength;
+    if (options.multiline) control.rows = 4;
+    label.appendChild(control);
+    return label;
+  }
+
+  function createSkillCard(skill) {
+    const card = document.createElement('article');
+    card.className = 'skill-card';
+    const heading = document.createElement('div');
+    heading.className = 'skill-card-heading';
+    const enabledLabel = document.createElement('label');
+    enabledLabel.className = 'checkbox-row skill-enabled';
+    const enabled = document.createElement('input');
+    enabled.type = 'checkbox';
+    enabled.name = 'enabled';
+    enabled.checked = Boolean(skill.enabled);
+    enabledLabel.append(enabled, document.createTextNode('เปิดใช้ Skill นี้'));
+    const remove = createProviderButton('ลบ Skill', 'button-danger', () => card.remove());
+    heading.append(enabledLabel, remove);
+    const fields = document.createElement('div');
+    fields.className = 'skill-fields';
+    fields.append(
+      makeSkillField('Skill ID', 'id', skill.id, { maxLength: 80 }),
+      makeSkillField('ชื่อ Skill', 'name', skill.name, { maxLength: 120 }),
+      makeSkillField('คำอธิบาย', 'description', skill.description, { maxLength: 400 }),
+      makeSkillField('Instructions', 'instructions', skill.instructions, { maxLength: 3000, multiline: true })
+    );
+    card.append(heading, fields);
+    return card;
+  }
+
+  function renderSkills() {
+    const list = $('#skillList');
+    list.replaceChildren();
+    if (!skills.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state provider-empty';
+      empty.textContent = 'ยังไม่มี Skill เพิ่มรายการเพื่อกำหนดคำแนะนำให้ผู้ช่วย AI';
+      list.appendChild(empty);
+      return;
+    }
+    skills.forEach((skill) => list.appendChild(createSkillCard(skill)));
+  }
+
+  async function loadSkills() {
+    try {
+      const response = await api('admin/skills');
+      skills = Array.isArray(response.skills) ? response.skills : [];
+      renderSkills();
+    } catch (error) {
+      setMessage($('#skillsMessage'), error.message, 'error');
+    }
+  }
+
+  function collectSkills() {
+    return [...document.querySelectorAll('.skill-card')].map((card) => ({
+      id: card.querySelector('[name="id"]').value.trim(),
+      name: card.querySelector('[name="name"]').value.trim(),
+      description: card.querySelector('[name="description"]').value.trim(),
+      instructions: card.querySelector('[name="instructions"]').value.trim(),
+      enabled: card.querySelector('[name="enabled"]').checked
+    }));
   }
 
   async function loadKnowledge() {
@@ -348,29 +585,74 @@
   $('#refreshLeads').addEventListener('click', loadLeads);
   $('#leadSearch').addEventListener('input', renderLeadList);
 
+  $('#addProvider').addEventListener('click', openNewProviderForm);
+  $('#cancelProvider').addEventListener('click', resetProviderForm);
+  $('#providerType').addEventListener('change', () => {
+    const current = $('#providerBaseUrl').value.trim();
+    const preset = providerPresets.find((item) => item.type === $('#providerType').value);
+    if (preset && (!current || current === lastPresetBaseUrl)) $('#providerBaseUrl').value = preset.baseUrl;
+    lastPresetBaseUrl = preset?.baseUrl || '';
+  });
+  $('#providerForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const message = $('#providerMessage');
+    setMessage(message, 'กำลังบันทึก Provider…');
+    const providerId = $('#providerId').value;
+    try {
+      await api(providerId ? `admin/providers/${encodeURIComponent(providerId)}` : 'admin/providers', {
+        method: providerId ? 'PUT' : 'POST',
+        body: JSON.stringify({
+          name: $('#providerName').value.trim(),
+          type: $('#providerType').value,
+          baseUrl: $('#providerBaseUrl').value.trim(),
+          model: $('#providerModel').value.trim(),
+          apiKey: $('#providerApiKey').value,
+          clearApiKey: $('#clearProviderApiKey').checked
+        })
+      });
+      resetProviderForm();
+      await Promise.all([loadProviders(), loadSettings(), loadHealth()]);
+      showToast('บันทึก Provider แล้ว');
+    } catch (error) {
+      setMessage(message, error.message, 'error');
+    }
+  });
+  $('#testProvider').addEventListener('click', () => {
+    const providerId = $('#providerId').value;
+    if (providerId) testProvider(providerId);
+  });
+
+  $('#addSkill').addEventListener('click', () => {
+    const uniqueId = `skill-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    $('#skillList').appendChild(createSkillCard({ id: uniqueId, name: '', description: '', instructions: '', enabled: false }));
+  });
+  $('#saveSkills').addEventListener('click', async () => {
+    const message = $('#skillsMessage');
+    setMessage(message, 'กำลังบันทึก Skills…');
+    try {
+      const response = await api('admin/skills', {
+        method: 'PUT',
+        body: JSON.stringify({ skills: collectSkills() })
+      });
+      skills = response.skills;
+      renderSkills();
+      setMessage(message, 'บันทึก Skills แล้ว', 'success');
+      showToast('บันทึก Skills แล้ว');
+    } catch (error) {
+      setMessage(message, error.message, 'error');
+    }
+  });
+
   $('#settingsForm').addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = $('#settingsMessage');
     setMessage(message, 'กำลังบันทึก…');
     try {
-      const response = await api('admin/settings', {
+      await api('admin/settings', {
         method: 'PUT',
-        body: JSON.stringify({
-          baseUrl: $('#aiBaseUrl').value.trim(),
-          model: $('#aiModel').value.trim(),
-          apiKey: $('#aiApiKey').value,
-          clearApiKey: $('#clearApiKey').checked,
-          systemPrompt: $('#systemPrompt').value
-        })
+        body: JSON.stringify({ systemPrompt: $('#systemPrompt').value })
       });
-      $('#aiApiKey').value = '';
-      $('#clearApiKey').checked = false;
-      setMessage(message, 'การตั้งค่าถูกบันทึกแล้ว', 'success');
-      const keyStatus = $('#apiKeyStatus');
-      keyStatus.textContent = response.settings.apiKeyConfigured
-        ? `ตั้งค่า key แล้ว${response.settings.apiKeyLast4 ? ` (ลงท้าย ${response.settings.apiKeyLast4})` : ''}`
-        : 'ยังไม่ได้ตั้งค่า API key';
-      await loadHealth();
+      setMessage(message, 'System Prompt ถูกบันทึกแล้ว', 'success');
       showToast('บันทึกการตั้งค่าแล้ว');
     } catch (error) {
       setMessage(message, error.message, 'error');
